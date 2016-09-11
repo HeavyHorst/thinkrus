@@ -31,13 +31,15 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 	}
 
 	hook := &RethinkHook{
-		session:   session,
-		table:     table,
-		batchChan: make(chan interface{}),
-		flushChan: make(chan struct{}),
-		flushed:   make(chan struct{}),
-		err:       nil,
-		errLock:   sync.RWMutex{},
+		session:       session,
+		table:         table,
+		batchChan:     make(chan interface{}),
+		flushChan:     make(chan struct{}),
+		flushed:       make(chan struct{}),
+		err:           nil,
+		errLock:       sync.RWMutex{},
+		batchCount:    200,
+		batchInterval: 5 * time.Second,
 	}
 
 	for _, o := range opts {
