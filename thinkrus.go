@@ -87,15 +87,21 @@ func (h *RethinkHook) Flush() {
 }
 
 func (h *RethinkHook) Fire(entry *logrus.Entry) error {
-	entry.Data["Level"] = entry.Level.String()
-	entry.Data["Time"] = entry.Time
-	entry.Data["Message"] = entry.Message
 	if errData, ok := entry.Data[logrus.ErrorKey]; ok {
 		if err, ok := errData.(error); ok && entry.Data[logrus.ErrorKey] != nil {
 			entry.Data[logrus.ErrorKey] = err.Error()
 		}
 	}
-	h.batchChan <- entry.Data
+
+	data := make(map[string]interface{})
+	for k, v := range entry.Data {
+		data[k] = v
+	}
+
+	data["Level"] = entry.Level.String()
+	data["Time"] = entry.Time
+	data["Message"] = entry.Message
+	h.batchChan <- data
 
 	h.errLock.RLock()
 	err := h.err
