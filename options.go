@@ -12,9 +12,9 @@ func WithBatchInterval(interval int) Option {
 	}
 }
 
-// WithBatchInterval sets the batchCount
-func WithBatchCount(count int) Option {
+// WithBatchSize sets the batchSize
+func WithBatchSize(count int) Option {
 	return func(o *RethinkHook) {
-		o.batchCount = count
+		o.batchSize = count
 	}
 }

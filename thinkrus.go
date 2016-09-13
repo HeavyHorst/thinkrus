@@ -12,7 +12,7 @@ type RethinkHook struct {
 	session       *r.Session
 	table         string
 	batchInterval time.Duration
-	batchCount    int
+	batchSize     int
 	batchChan     chan interface{}
 	flushChan     chan struct{}
 	flushed       chan struct{}
@@ -33,12 +33,11 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 	hook := &RethinkHook{
 		session:       session,
 		table:         table,
-		batchChan:     make(chan interface{}),
 		flushChan:     make(chan struct{}),
 		flushed:       make(chan struct{}),
 		err:           nil,
 		errLock:       sync.RWMutex{},
-		batchCount:    200,
+		batchSize:     200,
 		batchInterval: 5 * time.Second,
 	}
 
@@ -46,8 +45,10 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 		o(hook)
 	}
 
+	hook.batchChan = make(chan interface{}, hook.batchSize)
+
 	go func() {
-		batch := make([]interface{}, 0, hook.batchCount)
+		batch := make([]interface{}, 0, hook.batchSize)
 		ticker := time.NewTicker(hook.batchInterval)
 
 		flushAndClear := func() {
@@ -68,10 +69,13 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 				flushAndClear()
 			case b := <-hook.batchChan:
 				batch = append(batch, b)
-				if len(batch) >= hook.batchCount {
+				if len(batch) >= hook.batchSize {
 					flushAndClear()
 				}
 			case <-hook.flushChan:
+				for p := range hook.batchChan {
+					batch = append(batch, p)
+				}
 				flushAndClear()
 				hook.flushed <- struct{}{}
 			}
@@ -81,7 +85,8 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 	return hook, nil
 }
 
-func (h *RethinkHook) Flush() {
+func (h *RethinkHook) Close() {
+	close(h.batchChan)
 	h.flushChan <- struct{}{}
 	<-h.flushed
 }
@@ -98,9 +103,9 @@ func (h *RethinkHook) Fire(entry *logrus.Entry) error {
 		data[k] = v
 	}
 
-	data["Level"] = entry.Level.String()
-	data["Time"] = entry.Time
-	data["Message"] = entry.Message
+	data["level"] = entry.Level.String()
+	data["time"] = entry.Time
+	data["message"] = entry.Message
 	h.batchChan <- data
 
 	h.errLock.RLock()
