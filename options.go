@@ -1,6 +1,10 @@
 package thinkrus
 
-import "time"
+import (
+	"time"
+
+	gorethink "gopkg.in/dancannon/gorethink.v2"
+)
 
 // Option configures the Hook
 type Option func(*RethinkHook)
@@ -16,5 +20,12 @@ func WithBatchInterval(interval int) Option {
 func WithBatchSize(count int) Option {
 	return func(o *RethinkHook) {
 		o.batchSize = count
+	}
+}
+
+// WithSession sets the session
+func WithSession(s *gorethink.Session) Option {
+	return func(o *RethinkHook) {
+		o.session = s
 	}
 }

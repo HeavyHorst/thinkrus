@@ -22,16 +22,8 @@ type RethinkHook struct {
 
 func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 	var err error
-	session, err := r.Connect(r.ConnectOpts{
-		Address:  url,
-		Database: db,
-	})
-	if err != nil {
-		return nil, err
-	}
 
 	hook := &RethinkHook{
-		session:       session,
 		table:         table,
 		flushChan:     make(chan struct{}),
 		flushed:       make(chan struct{}),
@@ -43,6 +35,16 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 
 	for _, o := range opts {
 		o(hook)
+	}
+
+	if hook.session == nil {
+		hook.session, err = r.Connect(r.ConnectOpts{
+			Address:  url,
+			Database: db,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	hook.batchChan = make(chan interface{}, hook.batchSize)
