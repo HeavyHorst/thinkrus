@@ -88,8 +88,8 @@ func New(url, db, table string, opts ...Option) (*RethinkHook, error) {
 }
 
 func (h *RethinkHook) Close() {
-	close(h.batchChan)
 	h.flushChan <- struct{}{}
+	close(h.batchChan)
 	<-h.flushed
 }
 
