@@ -18,7 +18,7 @@ import (
 
 func main() {
 	log := logrus.New()
-	hook, err := thinkrus.New("localhost:28015", "test", "logs", thinkrus.WithBatchInterval(5), thinkrus.WithBatchSize(500)))
+	hook, err := thinkrus.New("localhost:28015", "test", "logs", thinkrus.WithBatchInterval(5), thinkrus.WithBatchSize(500))
 	if err == nil {
 		log.Hooks.Add(hook)
 	}
