@@ -34,8 +34,8 @@ All log messages are buffered by default to increase the performance. You need t
 ### Configuration
 The constructor takes three optional configuration options:
 
- 1. WithBatchInterval(int):  flush the buffer at the given interval in seconds (default is 5s).
- 2. WithBatchSize(int): Max size of the buffer. The buffer gets flushed to the db if this threshold is reached.
+ 1. WithBatchInterval(int):  flush the buffer at the given interval in seconds. (default is 5s)
+ 2. WithBatchSize(int): Max size of the buffer. The buffer gets flushed to the db if this threshold is reached. (default is 200)
  3. WithSession(s *gorethink.Session): A custom rethinkdb session.
 
 ### Message Field
