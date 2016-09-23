@@ -39,4 +39,4 @@ The constructor takes three optional configuration options:
  3. WithSession(s *gorethink.Session): A custom rethinkdb session.
 
 ### Message Field
-We will insert your message into InfluxDB with the field message.
+We will insert your message into RethinkDB with the field message.
