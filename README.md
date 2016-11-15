@@ -22,14 +22,14 @@ func main() {
 	if err == nil {
 		log.Hooks.Add(hook)
 	}
-	defer hook.Flush()
+	defer hook.Close()
 }
 ```
 
 Details
 ---
 ###Buffer
-All log messages are buffered by default to increase the performance. You need to run hook.Flush() on program exit to get sure that all messages are written to the database.
+All log messages are buffered by default to increase the performance. You need to run hook.Close() on program exit to get sure that all messages are written to the database.
 
 ### Configuration
 The constructor takes three optional configuration options:
